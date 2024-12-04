@@ -1,37 +1,62 @@
-// db.js - Fichier pour gérer les opérations CRUD avec Knex
-
 const knex = require('knex')(require('./knexfile')['development']);
 
-// Create
-async function createBoisson(name, quantity, price) {
-  return await knex('boissons').insert({ name, quantity, price });
+// Table `authentification`
+async function createUser(login, password, role) {
+  return await knex('authentification').insert({ login, password, role });
 }
 
-// Read
-async function getAllBoissons() {
-  return await knex.select().from('boissons');
+async function getUserByLogin(login) {
+  return await knex('authentification').where({ login }).first();
 }
 
-async function getBoisonById(id) {
-  return await knex('boissons').where({ id }).first();
+async function deleteAllUsers() {
+  return await knex('authentification').del();
 }
 
-// Update
-async function updateBoisson(id, quantity) {
-  return await knex('boissons').where({ id }).update({ quantity });
+// Table `voitures`
+async function createCar(brand, model, quantity, price) {
+  return await knex('voitures').insert({ brand, model, quantity, price });
 }
 
-// Delete
-async function deletBoisson(id) {
-  return await knex('boissons').where({ id }).del();
+async function getCarsByBrand(brand) {
+  return await knex('voitures').where({ brand });
+}
+
+async function getCarByModel(model) {
+  return await knex('voitures').where({ model }).first();
+}
+
+async function updateCarStock(model, newQuantity) {
+  return await knex('voitures').where({ model }).update({ quantity: newQuantity });
+}
+
+async function deleteAllCars() {
+  return await knex('voitures').del();
+}
+
+// Table `historique`
+async function addPurchase(userId, model, quantity, totalPrice) {
+  return await knex('historique').insert({ user_id: userId, model, quantity, total_price: totalPrice });
+}
+
+async function getUserHistory(userId) {
+  return await knex('historique').where({ user_id: userId });
+}
+
+async function deleteAllPurchases() {
+  return await knex('historique').del();
 }
 
 module.exports = {
-  createBoisson,
-  getAllBoissons,
-  getBoisonById,
-  updateBoisson,
-  deletBoisson
+  createUser,
+  getUserByLogin,
+  createCar,
+  getCarsByBrand,
+  getCarByModel,
+  updateCarStock,
+  addPurchase,
+  getUserHistory,
+  deleteAllUsers,
+  deleteAllCars,
+  deleteAllPurchases,
 };
-
-// npm install knex sqlite3

@@ -1,24 +1,55 @@
 const knex = require('knex')(require('./knexfile')['development']);
 
-async function createTable() {
+async function createTables() {
   try {
-    const exists = await knex.schema.hasTable('boissons');
-    if (!exists) {
-      await knex.schema.createTable('boissons', table => {
+    // Table `authentification`
+    const authExists = await knex.schema.hasTable('authentification');
+    if (!authExists) {
+      await knex.schema.createTable('authentification', (table) => {
         table.increments('id').primary();
-        table.string('name');
-        table.integer('price');
-        table.integer('quantity');
+        table.string('login').notNullable();
+        table.string('password').notNullable();
+        table.string('role').notNullable();
       });
-      console.log('La table "boissons" a été créée avec succès.');
+      console.log('Table "authentification" créée avec succès.');
     } else {
-      console.log('La table "boissons" existe déjà.');
+      console.log('Table "authentification" existe déjà.');
+    }
+
+    // Table `voitures`
+    const carsExists = await knex.schema.hasTable('voitures');
+    if (!carsExists) {
+      await knex.schema.createTable('voitures', (table) => {
+        table.increments('id').primary();
+        table.string('brand').notNullable();
+        table.string('model').notNullable();
+        table.integer('quantity').notNullable();
+        table.integer('price').notNullable();
+      });
+      console.log('Table "voitures" créée avec succès.');
+    } else {
+      console.log('Table "voitures" existe déjà.');
+    }
+
+    // Table `historique`
+    const historyExists = await knex.schema.hasTable('historique');
+    if (!historyExists) {
+      await knex.schema.createTable('historique', (table) => {
+        table.increments('id').primary();
+        table.integer('user_id').unsigned().references('id').inTable('authentification').onDelete('CASCADE');
+        table.string('model').notNullable();
+        table.integer('quantity').notNullable();
+        table.integer('total_price').notNullable();
+      });
+      console.log('Table "historique" créée avec succès.');
+    } else {
+      console.log('Table "historique" existe déjà.');
     }
   } catch (error) {
-    console.error('Erreur lors de la création de la table :', error);
+    console.error('Erreur lors de la création des tables :', error);
   } finally {
     await knex.destroy();
   }
 }
 
-createTable();
+createTables();
