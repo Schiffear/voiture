@@ -1,5 +1,7 @@
 const prompt = require("prompt-sync")({ sigint: true });
-const db = require('./boissonModel');
+const dbUsers = require('./models/users');
+const dbCars = require('./models/cars');
+const dbHistorique = require('./models/history');
 var limdu = require('limdu');
 
 // Configuration du classificateur
@@ -57,23 +59,23 @@ function preprocessInput(input) {
   // Fonction pour authentifier ou créer un compte
   async function authenticateUser() {
     while (!isAuthenticated) {
-      const userInput = prompt("Votre réponse: ").toLowerCase();
+      const userInput = prompt("Voulez-vous vous connecter ou vous inscrire ?").toLowerCase();
       const features = preprocessInput(userInput);
       const intent = classifier.classify(features);
 
       if (intent === "createAccount") {
-        const login = prompt("Creation de compte : Entrez votre nom et prénom : ");
+        const login = prompt("Creation de compte -> Entrez votre Nom : ");
         const password = prompt("Entrez votre mot de passe : ");
         const role = prompt("Êtes-vous un admin (oui/non) ? ") === "oui" ? "admin" : "client";
+        await dbUsers.createUser(login, password, role);
+        console.log(`Compte "${login}" créé avec succès !`);
 
-        await db.createUser(login, password, role);
-        console.log("Compte créé avec succès !");
         isAuthenticated = true; // L'utilisateur est authentifié après la création
-        userId = (await db.getUserByLogin(login)).id;
+        userId = (await dbUsers.getUserByLogin(login)).id;
       } else if (intent === "connect") {
-        const login = prompt("Connexion : Entrez votre nom et prénom : ");
+        const login = prompt("Connexion -> Entrez votre Nom : ");
         const password = prompt("Entrez votre mot de passe : ");
-        const user = await db.getUserByLogin(login);
+        const user = await dbUsers.getUserByLogin(login);
 
         if (user && user.password === password) {
           console.log(`Bienvenue, ${login}! Vous êtes connecté en tant que ${user.role}.`);
@@ -90,17 +92,18 @@ function preprocessInput(input) {
 
   // Authentification obligatoire
   await authenticateUser();
+  //userId disponible
 
   // Une fois l'utilisateur authentifié, il peut interagir avec les services
   while (true) {
-    const userInput = prompt("Votre réponse: ").toLowerCase();
+    const userInput = prompt("Parlez du type de voiture que vous voudriez, nous avons TOUT ! (sauf des Tesla): ").toLowerCase();
     const features = preprocessInput(userInput);
     const intent = classifier.classify(features);
 
     switch (intent) {
       case "buyCar":
         const brand = prompt("Achat : Quelle marque de voiture souhaitez-vous (ex: Ferrari, Lamborghini) ? ");
-        const cars = await db.getCarsByBrand(brand);
+        const cars = await dbCars.getByBrand(brand);
 
         if (cars.length === 0) {
           console.log(`Aucune voiture trouvée pour la marque ${brand}.`);
@@ -111,7 +114,7 @@ function preprocessInput(input) {
         cars.forEach(car => console.log(`- ${car.model} (${car.quantity} disponibles, ${car.price} EUR)`));
 
         const model = prompt("Quel modèle souhaitez-vous ? ");
-        const selectedCar = await db.getCarByModel(model);
+        const selectedCar = await dbCars.getByModel(model);
 
         if (!selectedCar || selectedCar.quantity <= 0) {
           console.log(`Désolé, le modèle ${model} n'est pas disponible.`);
@@ -127,20 +130,20 @@ function preprocessInput(input) {
         const totalPrice = quantity * selectedCar.price;
         console.log(`Le prix total est de ${totalPrice} EUR.`);
 
-        await db.updateCarStock(model, selectedCar.quantity - quantity);
-        await db.addPurchase(userId, model, quantity, totalPrice);
+        await dbCars.updateStock(model, selectedCar.quantity - quantity);
+        await dbHistorique.addPurchase(userId, model, quantity, totalPrice);
 
         console.log("Achat confirmé ! Merci pour votre commande.");
         break;
 
       case "listCars":
         console.log("Liste : Voici toutes les marques de voitures disponibles :");
-        const allCars = await db.getCarsByBrand('%');
+        const allCars = await dbCars.getByBrand('%');
         allCars.forEach(car => console.log(`- ${car.brand} ${car.model} (${car.price} EUR)`));
         break;
 
       case "showHistory":
-        const userHistory = await db.getUserHistory(userId);
+        const userHistory = await dbHistorique.getUserHistory(userId);
         if (userHistory.length === 0) {
           console.log("Aucun historique d'achat trouvé.");
         } else {
@@ -151,14 +154,14 @@ function preprocessInput(input) {
 
 		case "addCar":
 			// Vérifie si l'utilisateur est authentifié et est un administrateur
-			if (isAuthenticated && (await db.getUserById(userId)).role === "admin") {
+			if (isAuthenticated && (await dbUsers.getUserById(userId)).role === "admin") {
 			  const brand = prompt("Entrez la marque de la voiture : ");
 			  const model = prompt("Entrez le modèle de la voiture : ");
 			  const quantity = parseInt(prompt("Entrez la quantité : "), 10);
 			  const price = parseFloat(prompt("Entrez le prix de la voiture : "));
 		  
 			  // Ajout de la voiture dans la base de données
-			  await db.createCar(brand, model, quantity, price);
+			  await dbCars.create(brand, model, quantity, price);
 			  console.log(`La voiture ${brand} ${model} a été ajoutée avec succès.`);
 			} else {
 			  // Si l'utilisateur n'est pas un administrateur
