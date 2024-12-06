@@ -3,6 +3,7 @@ const dbUsers = require('./models/users');
 const dbCars = require('./models/cars');
 const dbHistorique = require('./models/history');
 var limdu = require('limdu');
+var colors = require('colors');
 
 // Configuration du classificateur
 const classifier = new limdu.classifiers.Bayesian();
@@ -17,7 +18,7 @@ function preprocessInput(input) {
 }
 
 (async function () {
-  console.log("Bienvenue dans notre chatbot pour voitures de luxe, veuillez vous connecter pour utiliser nos services !");
+  console.log("Bienvenue dans notre chatbot pour voitures de luxe, veuillez vous connecter pour utiliser nos services !".green);
   
   let isAuthenticated = false;
   let userId = null;
@@ -105,7 +106,8 @@ function preprocessInput(input) {
   
       const json = await response.json();
       if (json.total > 0) {
-        console.log("Vous êtes rechercher par Interpole, au revoir !");
+        console.log("Vous êtes recherché par Interpole, votre adresse ip a été transmise au service compétant, La police sera la d'ici 2 minutes ".underline.red.bold); 
+        console.log("Bon voyage en prison mon reuf ;)".rainbow); 
         legit = false
       }
 
