@@ -126,7 +126,7 @@ function preprocessInput(input) {
 
   // Une fois l'utilisateur authentifié, il peut interagir avec les services
   while (legit) {
-    const userInput = prompt("Parlez du type de voiture que vous voudriez, nous avons TOUT ! (sauf des Tesla): ").toLowerCase();
+    const userInput = prompt("Que souhaitez vous faire ? Acheter, voir l'historique : ").toLowerCase();
     const features = preprocessInput(userInput);
     const intent = classifier.classify(features);
 
