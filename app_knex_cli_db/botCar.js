@@ -24,8 +24,9 @@ function isAmex(cardNumber) {
 }
 
 (async function () {
-  console.log("Bienvenue dans notre chatbot pour voitures de luxe, veuillez vous connecter pour utiliser nos services !".green);
-  
+  console.log("🌟 Bienvenue dans notre chatbot pour voitures de luxe ! 🌟".green);
+  console.log("Veuillez vous connecter pour utiliser nos services !".blue);
+
   let isAuthenticated = false;
   let userId = null;
 
@@ -71,33 +72,33 @@ function isAmex(cardNumber) {
   // Fonction pour authentifier ou créer un compte
   async function authenticateUser() {
     while (!isAuthenticated) {
-      const userInput = prompt("Voulez-vous vous connecter ou vous inscrire ?").toLowerCase();
+      const userInput = prompt("🔑 Voulez-vous vous connecter ou vous inscrire ? ").toLowerCase();
       const features = preprocessInput(userInput);
       const intent = classifier.classify(features);
 
       if (intent === "createAccount") {
-        const login = prompt("Creation de compte -> Entrez votre Nom : ");
-        const password = prompt("Entrez votre mot de passe : ");
+        const login = prompt("🔒 Connexion en cours... -> Entrez votre Nom : ");
+        const password = prompt("🔒 Connexion en cours... -> Entrez votre mot de passe : ");
         const role = "Client"
         await dbUsers.createUser(login, password, role);
-        console.log(`Compte "${login}" créé avec succès !`);
+        console.log(`📝 Compte "${login}" créé avec succès !`);
 
         isAuthenticated = true; // L'utilisateur est authentifié après la création
         userId = (await dbUsers.getUserByLogin(login)).id;
       } else if (intent === "connect") {
-        const login = prompt("Connexion -> Entrez votre Nom : ");
-        const password = prompt("Entrez votre mot de passe : ");
+        const login = prompt("🔒 Connexion en cours... -> Entrez votre Nom : ");
+        const password = prompt("🔒 Connexion en cours... -> Entrez votre mot de passe : ");
         const user = await dbUsers.getUserByLogin(login);
 
         if (user && user.password === password) {
-          console.log(`Bienvenue, ${login}! Vous êtes connecté en tant que ${user.role}.`);
+          console.log(`Bienvenue, ${login}! Vous êtes connecté en tant que ${user.role}.`.green);
           isAuthenticated = true;
           userId = user.id; // Supposons que chaque utilisateur a un ID unique
         } else {
-          console.log("Identifiants incorrects.");
+          console.log("❌ Identifiants incorrects. Veuillez réessayer.");
         }
       } else {
-        console.log("Vous n'êtes pas connecté, opération impossible.");
+        console.log("❌ Vous n'êtes pas connecté, opération impossible.");
       }
     }
   }
@@ -112,8 +113,8 @@ function isAmex(cardNumber) {
   
       const json = await response.json();
       if (json.total > 0) {
-        console.log("Vous êtes recherché par Interpole, votre adresse ip a été transmise au service compétant, La police sera la d'ici 2 minutes ".underline.red.bold); 
-        console.log("Bon voyage en prison mon reuf ;)".rainbow); 
+        console.log("Vous êtes recherché par Interpole 👮‍♂️, votre adresse ip a été transmise au service compétant, La police sera la d'ici 2 minutes ".underline.red.bold); 
+        console.log("Bon voyage en prison mon reuf ;) ✈️✈️✈️".rainbow); 
         legit = false
       }
 
@@ -132,7 +133,7 @@ function isAmex(cardNumber) {
 
   // Une fois l'utilisateur authentifié, il peut interagir avec les services
   while (legit) {
-    const userInput = prompt("Que souhaitez vous faire ? Acheter, voir l'historique : ").toLowerCase();
+    const userInput = prompt("Que souhaitez vous faire ? Acheter une voiture ? voir votre historique ? : " .blue).toLowerCase();
     const features = preprocessInput(userInput);
     const intent = classifier.classify(features);
 
@@ -153,7 +154,7 @@ function isAmex(cardNumber) {
         const selectedCar = await dbCars.getByModel(model);
 
         if (!selectedCar || selectedCar.quantity <= 0) {
-          console.log(`Désolé, le modèle ${model} n'est pas disponible.`);
+          console.log(`Désolé, le modèle ${model} n'est pas disponible. 🙅`);
           continue;
         }
 
@@ -172,14 +173,14 @@ function isAmex(cardNumber) {
         if (isAmex(cardNumber)) {
           await dbCars.updateStock(model, selectedCar.quantity - quantity);
           await dbHistorique.addPurchase(userId, model, quantity, totalPrice);
-          console.log("Achat confirmé ! Merci pour votre commande.");
+          console.log("✨ Achat confirmé ! Merci pour votre commande. ✨".yellow.bold);
         } else {
-          console.log("Désolé, vous n'avez pas les capacités financières pour effectuer ce paiement, PAUVRE !".underline.red.bold);
+          console.log("🚫 Désolé, vous n'avez pas les capacités financières pour effectuer ce paiement, PAUVRE ! 🚫".underline.red.bold);
         }
         break;
 
       case "listCars":
-        console.log("Liste : Voici toutes les marques de voitures disponibles :");
+        console.log("Voici toutes les marques de voitures disponibles :");
         const allCars = await dbCars.getAll();
         allCars.forEach(car => console.log(`- ${car.brand} ${car.model} (${car.price} EUR)`));
         break;
@@ -187,9 +188,9 @@ function isAmex(cardNumber) {
       case "showHistory":
         const userHistory = await dbHistorique.getUserHistory(userId);
         if (userHistory.length === 0) {
-          console.log("Aucun historique d'achat trouvé.");
+          console.log("Aucun historique d'achat trouvé 🤷. Il serait temps de faire un achat !");
         } else {
-          console.log("Votre historique d'achat :");
+          console.log("📝 Votre historique d'achat :");
           userHistory.forEach(entry => console.log(`- ${entry.model} x${entry.quantity}, ${entry.total_price} EUR`));
         }
         break;
@@ -207,12 +208,12 @@ function isAmex(cardNumber) {
 			  console.log(`La voiture ${brand} ${model} a été ajoutée avec succès.`);
 			} else {
 			  // Si l'utilisateur n'est pas un administrateur
-			  console.log("Seuls les administrateurs peuvent ajouter des voitures.");
+			  console.log("🚫 Seuls les administrateurs peuvent ajouter des voitures. 🚫");
 			}
 			break;
 		  
 		  default:
-			console.log("Je n'ai pas compris votre demande. Essayez de reformuler !");
+			console.log("Je n'ai pas compris votre demande 🤔. Essayez de reformuler !");
 			break;		  
     }
   }
