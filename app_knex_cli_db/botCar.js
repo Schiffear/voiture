@@ -90,12 +90,35 @@ function preprocessInput(input) {
     }
   }
 
+  async function userLegit() {
+    userName = (await dbUsers.getUserById(userId)).login
+    try {
+      const response = await fetch (`https://ws-public.interpol.int/notices/v1/red?name=${userName}`);
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+  
+      const json = await response.json();
+      if (json.total > 0) {
+        console.log("Vous êtes rechercher par Interpole, au revoir !");
+        legit = false
+      }
+
+    } catch (error) {
+      console.error(error.message);
+    }
+    
+  }
+
+  let legit = true
+
   // Authentification obligatoire
   await authenticateUser();
   //userId disponible
+  await userLegit();
 
   // Une fois l'utilisateur authentifié, il peut interagir avec les services
-  while (true) {
+  while (legit) {
     const userInput = prompt("Parlez du type de voiture que vous voudriez, nous avons TOUT ! (sauf des Tesla): ").toLowerCase();
     const features = preprocessInput(userInput);
     const intent = classifier.classify(features);

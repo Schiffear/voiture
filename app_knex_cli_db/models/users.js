@@ -10,6 +10,11 @@ async function getUserByLogin(login) {
   return await knex('authentification').where({ login }).first();
 }
 
+// Retourne l'utilisateur en fonction de l'id
+async function getUserById(id) {
+  return await knex('authentification').where({ id }).first();
+}
+
 // Supprime tous les Users, sans aucune exception
 async function deleteAllUsers() {
   return await knex('authentification').del();
@@ -19,6 +24,7 @@ async function deleteAllUsers() {
 module.exports = {
     createUser,
     getUserByLogin,
+    getUserById,
     deleteAllUsers,
 
   };
