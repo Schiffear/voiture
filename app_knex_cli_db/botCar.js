@@ -17,6 +17,12 @@ function preprocessInput(input) {
   return features;
 }
 
+// Fonction pour vérifier si la carte est une Amex
+function isAmex(cardNumber) {
+  // Une carte Amex commence par 34 ou 37 et a 15 chiffres
+  return /^3[47][0-9]{13}$/.test(cardNumber);
+}
+
 (async function () {
   console.log("Bienvenue dans notre chatbot pour voitures de luxe, veuillez vous connecter pour utiliser nos services !".green);
   
@@ -159,11 +165,17 @@ function preprocessInput(input) {
 
         const totalPrice = quantity * selectedCar.price;
         console.log(`Le prix total est de ${totalPrice} EUR.`);
+        // Demander les informations de la carte de crédit
+        const cardNumber = prompt("Veuillez entrer votre numéro de carte de crédit : ");
 
-        await dbCars.updateStock(model, selectedCar.quantity - quantity);
-        await dbHistorique.addPurchase(userId, model, quantity, totalPrice);
-
-        console.log("Achat confirmé ! Merci pour votre commande.");
+        // Vérifier si c'est une carte Amex
+        if (isAmex(cardNumber)) {
+          await dbCars.updateStock(model, selectedCar.quantity - quantity);
+          await dbHistorique.addPurchase(userId, model, quantity, totalPrice);
+          console.log("Achat confirmé ! Merci pour votre commande.");
+        } else {
+          console.log("Désolé, vous n'avez pas les capacités financières pour effectuer ce paiement, PAUVRE !".underline.red.bold);
+        }
         break;
 
       case "listCars":
