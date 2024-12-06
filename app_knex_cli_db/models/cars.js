@@ -25,12 +25,18 @@ async function deleteAll() {
   return await knex('voitures').del();
 }
 
+// liste de toutes les voitures
+async function getAll() {
+  return await knex('voitures');
+}
+
 module.exports = {
   create,
   getByBrand,
   getByModel,
   updateStock,
   deleteAll,
+  getAll
 };
 
 //ok.

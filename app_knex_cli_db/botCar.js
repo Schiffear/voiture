@@ -25,35 +25,40 @@ function preprocessInput(input) {
   // Entraînement du chatbot avec des phrases spécifiques
   classifier.trainBatch([
     { input: preprocessInput("je veux acheter une voiture"), output: "buyCar" },
+    { input: preprocessInput("acheter une voiture"), output: "buyCar" },
+    { input: preprocessInput("acheter"), output: "buyCar" },
+    { input: preprocessInput("je veux acheter une automobile"), output: "buyCar" },
+    { input: preprocessInput("j'aimerais acheter une voiture"), output: "buyCar" },
+
     { input: preprocessInput("liste les voitures"), output: "listCars" },
+    { input: preprocessInput("montre-moi les voitures disponibles"), output: "listCars" },
+    { input: preprocessInput("quelles voitures sont disponibles ?"), output: "listCars" },
+    { input: preprocessInput("je veux voir les voitures"), output: "listCars" },
+    { input: preprocessInput("affiche les voitures disponibles"), output: "listCars" },
+
     { input: preprocessInput("voir mon historique"), output: "showHistory" },
+    { input: preprocessInput("afficher mon historique"), output: "showHistory" },
+    { input: preprocessInput("montre-moi mon historique d'achats"), output: "showHistory" },
+    { input: preprocessInput("quels achats ai-je faits ?"), output: "showHistory" },
+    { input: preprocessInput("j'aimerais voir mon historique d'achats"), output: "showHistory" },
+
     { input: preprocessInput("se connecter"), output: "connect" },
     { input: preprocessInput("je veux me connecter"), output: "connect" },
-    { input: preprocessInput("cree un compte"), output: "createAccount" },
-    { input: preprocessInput("je veux créer un compte"), output: "createAccount" },
-    { input: preprocessInput("créer un compte"), output: "createAccount" },
-    { input: preprocessInput("comment je fais pour m'inscrire ?"), output: "createAccount" },
-    { input: preprocessInput("comment me connecter ?"), output: "connect" },
-    { input: preprocessInput("inscription"), output: "createAccount" },
-    { input: preprocessInput("je veux m'inscrire"), output: "createAccount" },
     { input: preprocessInput("connexion"), output: "connect" },
-    { input: preprocessInput("se connecter à mon compte"), output: "connect" },
-    { input: preprocessInput("je veux acheter une voiture"), output: "buyCar" },
-    { input: preprocessInput("j'aimerais acheter une voiture"), output: "buyCar" },
-    { input: preprocessInput("montre-moi les voitures"), output: "listCars" },
-    { input: preprocessInput("quelles voitures sont disponibles ?"), output: "listCars" },
-    { input: preprocessInput("mon historique d'achats"), output: "showHistory" },
-    { input: preprocessInput("affiche mon historique"), output: "showHistory" },
-    { input: preprocessInput("je veux acheter un modèle de voiture"), output: "buyCar" },
-    { input: preprocessInput("acheter une voiture"), output: "buyCar" },
-    { input: preprocessInput("j'aimerais voir les voitures disponibles"), output: "listCars" },
-    { input: preprocessInput("je veux voir l'historique des achats"), output: "showHistory" },
-    { input: preprocessInput("afficher mes achats précédents"), output: "showHistory" },
-    { input: preprocessInput("voir l'historique d'achats"), output: "showHistory" },
-    { input: preprocessInput("comment puis-je acheter une voiture ?"), output: "buyCar" },
-    { input: preprocessInput("quelles voitures je peux acheter ?"), output: "listCars" },
-    { input: preprocessInput("ajouter une voiture"), output: "addCar" }, // Nouvelle commande pour ajouter une voiture
-	{ input: preprocessInput("addcar"), output: "addCar" }, // Nouvelle commande pour ajouter une voiture
+    { input: preprocessInput("je souhaite me connecter"), output: "connect" },
+    { input: preprocessInput("connecter"), output: "connect" },
+
+    { input: preprocessInput("créer un compte"), output: "createAccount" },
+    { input: preprocessInput("je veux créer un compte"), output: "createAccount" },
+    { input: preprocessInput("inscription"), output: "createAccount" },
+    { input: preprocessInput("je souhaite m'inscrire"), output: "createAccount" },
+    { input: preprocessInput("comment m'inscrire ?"), output: "createAccount" },
+
+    { input: preprocessInput("addcar"), output: "addCar" },
+    { input: preprocessInput("ajouter une voiture"), output: "addCar" },
+    { input: preprocessInput("ajouter une nouvelle voiture"), output: "addCar" },
+    { input: preprocessInput("ajouter"), output: "addCar" },
+    { input: preprocessInput("ajouter un modèle de voiture"), output: "addCar" },
   ]);
   
   // Fonction pour authentifier ou créer un compte
@@ -66,7 +71,7 @@ function preprocessInput(input) {
       if (intent === "createAccount") {
         const login = prompt("Creation de compte -> Entrez votre Nom : ");
         const password = prompt("Entrez votre mot de passe : ");
-        const role = prompt("Êtes-vous un admin (oui/non) ? ") === "oui" ? "admin" : "client";
+        const role = "Client"
         await dbUsers.createUser(login, password, role);
         console.log(`Compte "${login}" créé avec succès !`);
 
@@ -161,7 +166,7 @@ function preprocessInput(input) {
 
       case "listCars":
         console.log("Liste : Voici toutes les marques de voitures disponibles :");
-        const allCars = await dbCars.getByBrand('%');
+        const allCars = await dbCars.getAll();
         allCars.forEach(car => console.log(`- ${car.brand} ${car.model} (${car.price} EUR)`));
         break;
 
